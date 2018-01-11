@@ -1,0 +1,168 @@
+# Setting up JADE (Multiagent system)
+
+This section provides an overview of the JADE Architecture introducing the notions of
+• Agent
+• Container
+• Platform
+• Main Container
+• AMS and DF
+Figure 1 represents the main JADE architectural elements. An application based on JADE is made of a
+set of components called Agents each one having a unique name. Agents execute tasks and interact by
+exchanging messages. Agents live on top of a Platform that provides them with basic services such as
+message delivery. A platform is composed of one or more Containers. Containers can be executed on
+different hosts thus achieving a distributed platform. Each container can contain zero or more agents.
+For instance, with reference to the figure 1 below, container "Container 1" in host Host 3 contains
+agents A2 and A3. Even if in some particular scenarios this is not always the case, you can think of a
+Container as a JVM (so, 1 JVM ==> 1 container ==> 0 or many agents). A special container called
+Main Container exists in the platform. The main container is itself a container and can therefore contain
+agents, but differs from other containers as it must be the first container to start in the platform and all
+other containers register to it at bootstrap time and secondly, it includes two special agents: the AMS
+that represents the authority in the platform and is the only agent able to perform platform management
+actions such as starting and killing agents or shutting down the whole platform (normal agents can
+request such actions to the AMS). The DF that provides the Yellow Pages service where agents can
+publish the services they provide and find other agents providing the services they need. It should be
+noticed that if another main container is started, as in host Host 4 in Figure 1, this constitutes a new
+platform.
+
+<img src="https://msaadsadiq.github.io/jade1.PNG" class="img-responsive" alt="">
+
+Installing Jade
+In this section, the necessary per-requisites and installation guidelines are presented so that any future
+expansions can be followed without difficulties. First it is necessary to have the latest supported version
+of Java installed on the system.
+Step 1. Download and install the Java SE SDK (version 7u5). 
+Step 2. Download Eclipse (Juno release, Eclipse IDE for Java Developers package).
+Step 3. Download and unzip JADE (version 4.2.0), resulting in the following directory structure:
+ c:\jade-4.2.0\classes (from JADE-src-4.2.0.zip)
+ c:\jade-4.2.0\demo (merge from from JADE-bin-4.2.0.zip and JADE-examples-4.2.0)
+ c:\jade-4.2.0\doc (from JADE-doc-4.2.0.zip)
+ c:\jade-4.2.0\lib (merge from JADE-bin-4.2.0.zip and JADE-src-4.2.0.zip)
+ c:\jade-4.2.0\src (merge from JADE-src-4.2.0.zip and JADE-examples-4.2.0)
+
+Starting JADE
+We will now launch the JADE runtime and provides a brief description of the main features of the
+JADE administration GUI. Launching the JADE runtime means creating a Container, such container
+can then contain agents that can be started directly at container startup time or later on e.g. through the
+JADE Management GUI. Moreover, being the first container in the platform, such container MUST be
+the platform Main Container.
+In the previous section, when mentioning Download Jade ver 4.2, we assumes that the following
+packages were downloaded
+ - The JADE binary distribution (JADE-bin-4.0.zip)
+ - The JADE source distribution (JADE-src-4.0.zip)
+ - The JADE examples distribution (JADE-examples-4.0.zip)
+After unzipping the packages, the Jade directory structure should look something like figure 2: 
+
+<img src="https://msaadsadiq.github.io/jade2.PNG" class="img-responsive" alt="">
+
+
+When starting Jade, it should be notes that the Jade runtime can be launched in several ways. The
+easiest way is to open a shell, move to the jade directory and type
+java -cp lib\jade.jar jade.Boot -gui
+You should see an output similar to that below.
+May 02, 2016 12:06:12 PM jade.core.Runtime beginContainer
+INFO: ----------------------------------
+ This is JADE 4.4.0 - revision 6778 of 21-12-2015 12:24:43
+ downloaded in Open Source, under LGPL restrictions,
+ at http://jade.tilab.com/
+----------------------------------------
+May 02, 2016 12:06:12 PM jade.imtp.leap.LEAPIMTPManager initialize
+INFO: Listening for intra-platform commands on address:
+- jicp://10.33.13.153:1099
+May 02, 2016 12:06:13 PM jade.core.BaseService init
+INFO: Service jade.core.management.AgentManagement initialized
+May 02, 2016 12:06:13 PM jade.core.BaseService init
+INFO: Service jade.core.messaging.Messaging initialized
+May 02, 2016 12:06:13 PM jade.core.BaseService init
+INFO: Service jade.core.resource.ResourceManagement initialized
+May 02, 2016 12:06:13 PM jade.core.BaseService init
+INFO: Service jade.core.mobility.AgentMobility initialized
+May 02, 2016 12:06:13 PM jade.core.BaseService init
+INFO: Service jade.core.event.Notification initialized
+May 02, 2016 12:06:13 PM jade.mtp.http.HTTPServer <init>
+INFO: HTTP-MTP Using XML parser
+com.sun.org.apache.xerces.internal.jaxp.SAXParserImpl$JAXPSAXParser
+May 02, 2016 12:06:13 PM jade.core.messaging.MessagingService boot
+INFO: MTP addresses:
+http://ddmnn1:7778/acc
+May 02, 2016 12:06:13 PM jade.core.AgentContainerImpl joinPlatform
+INFO: --------------------------------------
+Agent container Main-Container@10.33.13.153 is ready.
+--------------------------------------------
+They key information to take from this console log is the information highlighted with yellow color.
+The first one indicates the host (typically the local host) and port (1099 by default) where the Main
+Container accepts incoming connections from other containers. It is possible to make Jade use a
+different port by means of the -local-port <a-port> option. For instance to make the Main Container
+accept incoming connections from other containers on port 1111 it would be sufficient to type the
+command line below.
+java -cp lib\jade.jar jade.Boot -gui -local-port 1111
+
+Similarly it is possible to make JADE use a different host name/address with respect to that read from
+the underlying network stack by means of the -local-host <host-name-or-address> option. This is
+typically useful when dealing with network environments where hosts can be reached only by
+specifying hostnames including the network domain (e.g. rvc.eng.miami.edu) as exemplified below
+java -cp lib\jade.jar jade.Boot -gui -local-host rvc.eng.miami.edu
+The second highlighted information is the name of the newly started Container (remember that the
+Main Container is itself a Container). By default the name assigned to a Main Container is "Main
+Container". You can explicitly assign a name to a Container (regardless of it is a Main or peripheral
+Container) by means of the -container-name <a-name> option. Since we specified the -gui option, the
+JADE Management Console depicted in figure 3 should also appear.
+
+<img src="https://msaadsadiq.github.io/jade3.PNG" class="img-responsive" alt="">
+
+In the left part of the Management Console you can see a tree showing that there is a Platform called
+<Main-Container-host>:<Main-Container-port>/JADE (note that, by the fact the we launched a Main
+Container, we actually created a Platform) that is composed of a single Container called Main
+Container, that, on its turn, contains three agents:
+ 1. The ams i.e. agent management system
+ 2. The df i.e. directory facilitator or the Yellow pages service
+ 3. The rma i.e. Remote Management Agent, implementing the JADE Management Console
+Looking at agent names we see that they have the form 
+
+<local-name>@<platform-name>
+It is possible to set a different platform name by means of the -platform-id <a-platform-name>
+configuration option as in the command line below.
+java -cp lib\jade.jar jade.Boot -gui -platform-id MyPlatform
+If we did that, agents would have been called ams@MyPlatform, df@MyPlatform and
+rma@MyPlatform respectively.
+Testing the Hello World program
+Now we will try to connect our Eclipse IDE to the Jade platform and try running the standard Hello
+World program through the IDE. To achieve this we follow the below steps
+Step 1. In Eclipse: created a new Java project named HelloWorldAgent.
+Step 2. In Eclipse: navigated to menu Project > Properties; section Java Build Path; tab Libraries.
+Step 3. Add (via “Add external JARs…” button) the two JAR files jade.jar and common-codec-1.3.jar
+ (both from the lib directory).
+Step 4. Add a new class named HelloWorldAgent to the project, specified jade.core.Agent as the parent
+class.
+Step 5. Override the setup method in the new class to say hello to the console. The finished agent class
+should look as follows:
+import jade.core.Agent;
+ public class HelloWorldAgent extends Agent {
+ protected void setup() {
+ System.out.println("Hellod. I'm an agent.");
+ }
+ }
+Step 6. Compile the project. Eclipse automatically compiles on the fly, so we didnt have to compile
+explicitly with the javac command.
+Step 7. Set/edit the CLASSPATH environment variable to contain the paths of the JADE JAR files, the
+JADE class directory and the directory of the HelloWorldAgent:
+
+ Set a “user variable”-type environment variable with name CLASSPATH and the following
+value: %JADE_HOME%\lib\jade.jar;%JADE_HOME%\lib\common-codec\common-codec1.3.jar;c:\Users\Saad\workspace\HelloWorldAgent\bin;%JADE_HOME%\classes
+
+
+Step 8. Start a up a console and boot the agent:
+ java jade.Boot -agents Saad:HelloWorldAgent 
+ 
+ 
+ Step 9. (optional) If Java gave an error, you either need to specify the -classpath parameter for the java
+command or set the CLASSPATH environment variable.
+
+Shutting Down the Platform
+In order to shut the platform down, in the Management Gui, choose File --> Shut down Agent Platform
+and then select Yes when prompted for confirmation. Next we will discuss about java swing and how it
+has been used to develop the GUI. A short code snippet has been provided to inherit the swing libraries
+and make a sample box. Anyone reproducing our simulation can run this code to test java swing and its
+capabilities. 
+
+
+
